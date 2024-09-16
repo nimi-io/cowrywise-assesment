@@ -6,24 +6,29 @@ admin = Blueprint('admin', __name__)
 
 @admin.route('/api/v1/books', methods=['POST'])
 def add_book():
-    data = request.json
+   schema = BookSchema()
+   try:
+        data = request.json
     
-    check_book = Book.query.filter_by(title=data['title'], author=data['author']).first()
+        check_book = Book.query.filter_by(title=data['title'], author=data['author']).first()
 
-    if check_book:
-        return jsonify({'message': 'Book already exists'}), 409
+        if check_book:
+            return jsonify({'message': 'Book already exists'}), 409
 
-    new_book = Book(
-        title=data['title'],
-        author=data['author'],
-        publisher=data['publisher'],
-        category=data['category'],
-        is_available=True
-    )
-    db.session.add(new_book)
-    db.session.commit()
-    return jsonify({'message': 'Book added'}), 201
-
+        new_book = Book(
+            title=data['title'],
+            author=data['author'],
+            publisher=data['publisher'],
+            category=data['category'],
+            is_available=True
+        )
+        db.session.add(new_book)
+        db.session.commit()
+        return jsonify({'message': 'Book added'}), 201
+   except ValidationError as err:
+        return jsonify({'errors': err.messages}), 400
+   except Exception as e:
+        return jsonify({'message': str(e)}), 500
 @admin.route('/api/v1/books/<int:id>', methods=['DELETE'])
 def remove_book(id):
     book = Book.query.get_or_404(id)
