@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  admin_service:
+    build: ./admin_service
+    container_name: admin_service
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/library_db # Use 5432 for internal communication
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    command: bash -c "cd ./admin_service && ls && python app.py"
+
+  frontend_service:
+    build: ./frontend_service
+    container_name: frontend_service
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/library_db # Use 5432 for internal communication
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    command: bash -c "cd ./frontend_service && ls && python app.py"
+
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: library_db
+    ports:
+      - "5433:5432" # Maps external port 5433 to internal PostgreSQL port 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

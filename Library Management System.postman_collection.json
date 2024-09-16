@@ -1,0 +1,183 @@
+{
+	"info": {
+		"_postman_id": "098f9459-89cb-4084-a0fb-c8beb4de44c1",
+		"name": "Library Management System",
+		"description": "Combined collection to test Frontend and Admin endpoints for Library Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "18657100"
+	},
+	"item": [
+		{
+			"name": "Frontend API",
+			"item": [
+				{
+					"name": "User - Enroll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"firstname\": \"John\",\n    \"lastname\": \"Doe\"\n}"
+						},
+						"url": "http://localhost:8001/api/v1/users/enroll"
+					},
+					"response": []
+				},
+				{
+					"name": "List All Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8001/api/v1/books"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8001/api/v1/books/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Books by Publisher",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8001/api/v1/books?publisher=Wiley",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"v1",
+								"books"
+							],
+							"query": [
+								{
+									"key": "publisher",
+									"value": "Wiley"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Books by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8001/api/v1/books?category=fiction",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"api",
+								"v1",
+								"books"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "fiction"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Borrow a Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": 1,\n  \"days\": 7\n}"
+						},
+						"url": "http://localhost:8001/api/v1/books/borrow/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin API",
+			"item": [
+				{
+					"name": "Admin - Add New Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Book Title\",\n    \"author\": \"Author Name\",\n    \"publisher\": \"Publisher Name\",\n    \"category\": \"Category\",\n    \"available\": true\n}"
+						},
+						"url": "http://localhost:8000/api/v1/books"
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - Remove a Book",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8000/api/v1/books/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - List Enrolled Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8000/api/v1/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - List Users and Borrowed Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8000/api/v1/users/borrowed-books"
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - List Unavailable Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8000/api/v1/books/unavailable"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
