@@ -1,4 +1,3 @@
-# tests/test_frontend_api.py
 import pytest
 from app.main import app
 from fastapi.testclient import TestClient
