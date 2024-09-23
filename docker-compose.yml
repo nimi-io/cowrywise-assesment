@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   admin_service:
@@ -7,12 +7,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/library_db # Use 5432 for internal communication
+      - DATABASE_URL=postgresql://user:password@db_admin:5432/library_db_admin  # Connect to admin db service
+      - RABBITMQ_HOST=rabbitmq  # Connect to RabbitMQ service
     depends_on:
-      - db
+      - db_admin
+      - rabbitmq
     volumes:
       - .:/app
-    command: bash -c "cd ./admin_service && ls && python app.py"
+    command: bash -c "cd ./admin_service && python app.py"
+    networks:
+      - library_network
 
   frontend_service:
     build: ./frontend_service
@@ -20,24 +24,58 @@ services:
     ports:
       - "8001:8000"
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/library_db # Use 5432 for internal communication
+      - DATABASE_URL=postgresql://user:password@db_frontend:5432/library_db_frontend 
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
-      - db
+      - db_frontend
+      - rabbitmq
     volumes:
       - .:/app
-    command: bash -c "cd ./frontend_service && ls && python app.py"
+    command: bash -c "cd ./frontend_service && python app.py"
+    networks:
+      - library_network
 
-  db:
+  db_admin:
     image: postgres:13
-    container_name: postgres_db
+    container_name: postgres_db_admin
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: library_db
+      POSTGRES_DB: library_db_admin
     ports:
-      - "5433:5432" # Maps external port 5433 to internal PostgreSQL port 5432
+      - "5434:5432" 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_admin:/var/lib/postgresql/data  
+    networks:
+      - library_network
+
+  db_frontend:
+    image: postgres:13
+    container_name: postgres_db_frontend
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: library_db_frontend
+    ports:
+      - "5435:5432" 
+    volumes:
+      - postgres_data_frontend:/var/lib/postgresql/data  
+    networks:
+      - library_network
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" 
+      - "15672:15672" 
+    networks:
+      - library_network
 
 volumes:
-  postgres_data:
+  postgres_data_admin:
+  postgres_data_frontend:
+
+networks:
+  library_network:
+    driver: bridge

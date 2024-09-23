@@ -2,10 +2,54 @@ from flask import Blueprint, jsonify, request
 from models import  BorrowSchema, ReturnBookSchema, UserSchema, db, Book, User, Borrow
 from datetime import datetime, timedelta
 from marshmallow import Schema, fields, ValidationError
+# from redis import Redis 
+import pika
+import json
+import threading
 
-# from forms import UserForm 
 
 frontend = Blueprint('frontend', __name__)
+
+def consume_messages():
+    connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
+    channel = connection.channel()
+    channel.queue_declare(queue='book_updates')
+
+    def callback(ch, method, properties, body):
+        data = json.loads(body)
+        if data['action'] == 'add':
+            existing_book = Book.query.filter_by(id=data['book_id']).first()
+            if not existing_book:
+                new_book = Book(
+                    id=data['book_id'],
+                    title=data['title'],
+                    author=data['author'],
+                    publisher=data['publisher'],
+                    category=data['category'],
+                    is_available=True
+                )
+                db.session.add(new_book)
+                db.session.commit()
+                print(f"New book added: {new_book.title}")
+            else:
+                print(f"Book {data['title']} already exists.")
+        elif data['action'] == 'remove':
+            book = Book.query.filter_by(id=data['book_id']).first()
+            if book:
+                db.session.delete(book)
+                db.session.commit()
+                print(f"Book removed: {book.title}")
+            else:
+                print(f"Book {data['book_id']} not found for removal.")
+
+    channel.basic_consume(queue='book_updates', on_message_callback=callback, auto_ack=True)
+    print('Waiting for messages. To exit press CTRL+C')
+    channel.start_consuming()
+
+# Run the consumer in a separate thread
+import threading
+thread = threading.Thread(target=consume_messages)
+thread.start()
 
 @frontend.route('/api/v1/users/enroll', methods=['POST'])
 def enroll_user():    
