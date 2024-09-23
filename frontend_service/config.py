@@ -11,4 +11,6 @@ class Config:
     def get_rabbitmq_connection():
         parameters = pika.URLParameters(Config.RABBITMQ_URL)
         connection = pika.BlockingConnection(parameters)
+        # channel = connection.channel()
+
         return connection

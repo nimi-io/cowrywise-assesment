@@ -6,13 +6,15 @@ from marshmallow import Schema, fields, ValidationError
 import pika
 import json
 import threading
+import config
 
 
 frontend = Blueprint('frontend', __name__)
 
 def consume_messages():
-    connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
-    channel = connection.channel()
+    connection = config.Config.get_rabbitmq_connection()  
+    channel = connection.channel()  
+    
     channel.queue_declare(queue='book_updates')
 
     def callback(ch, method, properties, body):
@@ -43,13 +45,10 @@ def consume_messages():
                 print(f"Book {data['book_id']} not found for removal.")
 
     channel.basic_consume(queue='book_updates', on_message_callback=callback, auto_ack=True)
-    print('Waiting for messages. To exit press CTRL+C')
-    channel.start_consuming()
 
-# Run the consumer in a separate thread
-import threading
-thread = threading.Thread(target=consume_messages)
-thread.start()
+    print('Waiting for messages. To exit press CTRL+C')
+    
+    channel.start_consuming()
 
 @frontend.route('/api/v1/users/enroll', methods=['POST'])
 def enroll_user():    
